@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lista Fofa ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FFB7C5">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3081/3081840.png">
+
+    <style>
+        /* --- 🎨 VARIÁVEIS & TEMAS --- */
+        :root {
+            /* Padrão: Pastel Dream */
+            --primary: #FFB7C5; --primary-dark: #FF9EAF; --secondary: #BEE7E8;
+            --bg-grad-1: #FDF6F8; --bg-grad-2: #F1F7F8;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #6B6B6B; --text-head: #4A4A4A;
+            --border: #E0E0E0; --focus: rgba(255, 183, 197, 0.4);
+            --shadow: 0 10px 30px rgba(0,0,0,0.05);
+            --radius: 24px;
+        }
+
+        body.theme-moon { --primary: #7B61FF; --primary-dark: #6A50E0; --secondary: #2C2C54; --bg-grad-1: #1A1A2E; --bg-grad-2: #16213E; --card-bg: rgba(30,30,50,0.95); --text-main: #A0A0C0; --text-head: #EAEAEA; --border: #3A3A5A; --focus: rgba(123,97,255,0.4); }
+        body.theme-nature { --primary: #8FB339; --primary-dark: #7A9A30; --secondary: #D6E5C6; --bg-grad-1: #F4F9F1; --bg-grad-2: #E9F2E1; --card-bg: rgba(255,255,255,0.95); --text-main: #5F6B50; --text-head: #3E4B32; --border: #CCD5C0; --focus: rgba(143,179,57,0.4); }
+        body.theme-candy { --primary: #FF6BAD; --primary-dark: #E85095; --secondary: #FFD700; --bg-grad-1: #FFF0F5; --bg-grad-2: #FFFACD; --card-bg: rgba(255,255,255,0.98); --text-main: #707070; --text-head: #FF6BAD; --border: #FFC0CB; --focus: rgba(255,107,173,0.4); }
+        body.theme-minimal { --primary: #333; --primary-dark: #000; --secondary: #E0E0E0; --bg-grad-1: #F8F9FA; --bg-grad-2: #E9ECEF; --card-bg: #FFF; --text-main: #666; --text-head: #111; --border: #DDD; --focus: rgba(51,51,51,0.2); }
+
+        /* --- RESET & BASE --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2)); color: var(--text-main); height: 100vh; overflow: hidden; transition: background 0.5s ease; }
+        
+        /* Containers */
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        /* --- TELA 1: BOAS VINDAS --- */
+        #welcome-screen { justify-content: center; z-index: 2; }
+        #welcome-screen.hidden { opacity: 0; transform: translateY(-50px); pointer-events: none; }
+
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            padding: 30px; border-radius: var(--radius);
+            box-shadow: var(--shadow); width: 100%; max-width: 400px;
+            text-align: center;
+        }
+
+        h1 { color: var(--text-head); font-size: 1.8rem; margin-bottom: 10px; }
+        h3 { color: var(--text-head); margin-bottom: 20px; }
+        p.subtitle { margin-bottom: 25px; font-size: 0.95rem; }
+        .label { display: block; text-align: left; margin-bottom: 10px; font-weight: 700; color: var(--text-head); font-size: 0.9rem; }
+
+        /* Inputs & Grids */
+        input[type="text"] {
+            width: 100%; padding: 15px; border: 2px solid var(--border);
+            border-radius: 16px; font-size: 1rem; color: var(--text-head); background: transparent;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--focus); }
+
+        .grid-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 25px; }
+        
+        .theme-dot {
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .theme-dot:hover { transform: scale(1.1); }
+        .theme-dot.active { transform: scale(1.2); border: 2px solid var(--text-head); }
+        .theme-dot svg { width: 16px; fill: white; opacity: 0.9; }
+
+        .avatar-box {
+            width: 60px; height: 60px; border-radius: 18px; cursor: pointer;
+            background: var(--bg-grad-1); border: 2px solid transparent; padding: 5px;
+            transition: 0.3s;
+        }
+        .avatar-box:hover { background: var(--secondary); transform: translateY(-3px); }
+        .avatar-box.selected { border-color: var(--primary); background: var(--card-bg); box-shadow: 0 4px 12px var(--focus); }
+        .avatar-box svg { width: 100%; height: 100%; }
+
+        /* Botões */
+        button { font-family: 'Nunito', sans-serif; }
+        
+        button.btn-primary {
+            width: 100%; padding: 16px; border: none; border-radius: 16px;
+            background: var(--primary); color: #fff; font-size: 1.1rem; font-weight: 800;
+            cursor: pointer; box-shadow: 0 5px 15px var(--focus); transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        button.btn-primary:active { transform: scale(0.98); }
+        button svg { width: 20px; fill: currentColor; }
+
+        button.btn-secondary {
+            width: 100%; padding: 16px; border: 2px solid var(--primary); border-radius: 16px;
+            background: transparent; color: var(--text-head); font-size: 1rem; font-weight: 700;
+            cursor: pointer; margin-bottom: 10px; transition: 0.3s;
+        }
+        button.btn-secondary:hover { background: var(--bg-grad-2); }
+        
+        button.btn-close {
+            background: transparent; border: none; color: var(--text-main); 
+            margin-top: 15px; cursor: pointer; text-decoration: underline;
+        }
+
+        /* --- TELA 2: LISTA DE COMPRAS --- */
+        #app-screen { z-index: 1; opacity: 0; transform: translateY(50px); padding-top: 40px; }
+        #app-screen.visible { opacity: 1; transform: translateY(0); }
+
+        .app-header {
+            width: 100%; max-width: 500px; display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; padding: 0 10px;
+        }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 50px; height: 50px; border-radius: 50%; background: white; padding: 5px; box-shadow: var(--shadow); }
+        .user-text h2 { font-size: 1.4rem; color: var(--text-head); }
+        .user-text span { font-size: 0.9rem; opacity: 0.8; }
+
+        .input-bar {
+            width: 100%; max-width: 500px; display: flex; gap: 10px; margin-bottom: 30px;
+        }
+        .add-btn {
+            width: 54px; background: var(--primary); border: none; border-radius: 16px;
+            color: white; cursor: pointer; box-shadow: 0 4px 10px var(--focus);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .add-btn svg { width: 24px; height: 24px; fill: white; }
+
+        /* Lista de Itens */
+        ul { list-style: none; width: 100%; max-width: 500px; padding-bottom: 80px; overflow-y: auto; }
+        
+        li {
+            background: var(--card-bg); padding: 16px; border-radius: 18px;
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: all 0.3s ease;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        
+        li.checked { opacity: 0.6; background: rgba(255,255,255,0.5); }
+        li.checked span { text-decoration: line-through; }
+
+        .item-left { display: flex; align-items: center; gap: 15px; cursor: pointer; flex: 1; }
+        
+        /* Checkbox SVG Customizado */
+        .check-circle {
+            width: 24px; height: 24px; border: 2px solid var(--border); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        li.checked .check-circle { border-color: var(--primary); background: var(--primary); }
+        .check-circle svg { width: 14px; fill: white; opacity: 0; transform: scale(0); transition: 0.2s; }
+        li.checked .check-circle svg { opacity: 1; transform: scale(1); }
+
+        .item-text { font-size: 1.1rem; font-weight: 600; color: var(--text-head); word-break: break-word; }
+
+        .delete-btn {
+            background: transparent; border: none; cursor: pointer; padding: 8px;
+            opacity: 0.4; transition: 0.2s;
+        }
+        .delete-btn:hover { opacity: 1; transform: scale(1.1); }
+        .delete-btn svg { width: 20px; fill: #FF6B6B; }
+
+        /* Empty State & Offline */
+        .empty-state { text-align: center; margin-top: 50px; opacity: 0.5; display: none; }
+        .empty-state svg { width: 80px; fill: var(--text-main); margin-bottom: 10px; }
+        #offline-indicator { display: none; text-align:center; padding: 5px; font-size: 0.8rem; background: #333; color: white; border-radius: 10px; margin-bottom: 10px;}
+
+        /* --- MODAL DE CONFIGURAÇÕES --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal-card { max-width: 320px; transform: scale(0.8); transition: 0.3s; }
+        .modal-overlay.open .modal-card { transform: scale(1); }
+        
+        .hidden-credits { display: none; margin-top: 15px; color: var(--primary); font-weight: bold; }
+        .show-credits-anim { display: block; animation: popIn 0.3s; }
+
+    </style>
+</head>
+<body>
+
+    <main id="welcome-screen" class="screen">
+        <div class="card">
+            <h1>Olá, lindeza! ✨</h1>
+            <p class="subtitle">Vamos personalizar sua lista?</p>
+
+            <span class="label">Escolha um estilo:</span>
+            <div class="grid-row" id="theme-selector">
+                <div class="theme-dot active" data-theme="" style="background:#FFB7C5"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                <div class="theme-dot" data-theme="theme-moon" style="background:#7B61FF"></div>
+                <div class="theme-dot" data-theme="theme-nature" style="background:#8FB339"></div>
+                <div class="theme-dot" data-theme="theme-candy" style="background:#FF6BAD"></div>
+                <div class="theme-dot" data-theme="theme-minimal" style="background:#EEE"></div>
+            </div>
+
+            <span class="label">Seu nomezinho:</span>
+            <div class="grid-row">
+                <input type="text" id="username-input" placeholder="Ex: Ju, Pedro..." autocomplete="off">
+            </div>
+
+            <span class="label">Um avatar fofo:</span>
+            <div class="grid-row" id="avatar-selector">
+                <div class="avatar-box selected" data-id="1"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFD1DC"/><path d="M30,40 Q35,25 50,25 Q65,25 70,40" fill="none" stroke="#A38692" stroke-width="3"/><circle cx="35" cy="55" r="5" fill="#7B61FF"/><circle cx="65" cy="55" r="5" fill="#7B61FF"/><path d="M45,65 Q50,70 55,65" fill="none" stroke="#A38692" stroke-width="3" stroke-linecap="round"/><path d="M20,30 L30,40 M80,30 L70,40" stroke="#A38692" stroke-width="3" stroke-linecap="round"/></svg></div>
+                <div class="avatar-box" data-id="2"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#D4ECD4"/><circle cx="25" cy="25" r="15" fill="#A3CFA3"/><circle cx="75" cy="25" r="15" fill="#A3CFA3"/><circle cx="35" cy="55" r="4" fill="#5F6B50"/><circle cx="65" cy="55" r="4" fill="#5F6B50"/><ellipse cx="50" cy="70" rx="10" ry="8" fill="#A3CFA3"/><path d="M45,70 L55,70" stroke="#5F6B50" stroke-width="2"/></svg></div>
+                <div class="avatar-box" data-id="3"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FFDCA3"/><path d="M10,10 L30,40 L50,20 L70,40 L90,10" fill="#FFB347"/><circle cx="35" cy="55" r="4" fill="#8B4513"/><circle cx="65" cy="55" r="4" fill="#8B4513"/><path d="M45,70 Q50,75 55,70" fill="none" stroke="#8B4513" stroke-width="3" stroke-linecap="round"/></svg></div>
+                <div class="avatar-box" data-id="4"><svg viewBox="0 0 100 100"><circle cx="50" cy="60" r="35" fill="#E0E0E0"/><ellipse cx="35" cy="25" rx="10" ry="20" fill="#E0E0E0"/><ellipse cx="65" cy="25" rx="10" ry="20" fill="#E0E0E0"/><circle cx="40" cy="60" r="4" fill="#666"/><circle cx="60" cy="60" r="4" fill="#666"/><path d="M50,70 L50,75 M45,75 L55,75" stroke="#FFB7C5" stroke-width="3" stroke-linecap="round"/></svg></div>
+            </div>
+
+            <button class="btn-primary" onclick="goToApp()">
+                Continuar <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </button>
+        </div>
+    </main>
+
+    <main id="app-screen" class="screen">
+        <header class="app-header">
+            <div class="user-info">
+                <div class="user-avatar" id="app-avatar-display"></div>
+                <div class="user-text">
+                    <h2 id="app-username-display">Olá!</h2>
+                    <span>Sua lista de compras</span>
+                </div>
+            </div>
+            <div style="cursor:pointer; font-size: 1.5rem;" onclick="openSettings()">⚙️</div>
+        </header>
+
+        <div id="offline-indicator">📱 Modo Offline</div>
+
+        <div class="input-bar">
+            <input type="text" id="itemInput" placeholder="O que vamos comprar hoje?" onkeypress="handleEnter(event)">
+            <button class="add-btn" onclick="addItem()">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+        </div>
+
+        <ul id="shoppingList"></ul>
+
+        <div class="empty-state" id="emptyMsg">
+            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            <p>Sua lista está vazia!</p>
+        </div>
+    </main>
+
+    <div id="settings-modal" class="modal-overlay">
+        <div class="card modal-card">
+            <h3>Ajustes ⚙️</h3>
+            
+            <button class="btn-secondary" onclick="showCredits()">
+                Créditos
+            </button>
+            
+            <button class="btn-primary" onclick="resetProfile()">
+                Editar Perfil ✏️
+            </button>
+
+            <div id="credits-area" class="hidden-credits">
+                <p>Feito com ❤️ por <strong>Vitor</strong></p>
+            </div>
+
+            <button class="btn-close" onclick="closeSettings()">Voltar</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG OFFLINE ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(console.log);
+        }
+        window.addEventListener('offline', () => document.getElementById('offline-indicator').style.display = 'block');
+        window.addEventListener('online', () => document.getElementById('offline-indicator').style.display = 'none');
+
+        // --- APP LOGIC ---
+        let currentUser = { name: '', theme: '', avatarHtml: '' };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPreferences();
+            loadList();
+        });
+
+        // Seleção de Tema/Avatar
+        const themeDots = document.querySelectorAll('.theme-dot');
+        themeDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                themeDots.forEach(d => { d.classList.remove('active'); d.innerHTML = ''; });
+                dot.classList.add('active');
+                dot.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+                const theme = dot.getAttribute('data-theme');
+                document.body.className = theme;
+                currentUser.theme = theme;
+            });
+        });
+
+        const avatarBoxes = document.querySelectorAll('.avatar-box');
+        avatarBoxes.forEach(box => {
+            box.addEventListener('click', () => {
+                avatarBoxes.forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+                currentUser.avatarHtml = box.innerHTML;
+            });
+        });
+
+        function goToApp() {
+            const nameInput = document.getElementById('username-input');
+            const name = nameInput.value.trim();
+            if(!name) { nameInput.style.borderColor = "red"; nameInput.placeholder = "Preciso de um nome!"; return; }
+
+            currentUser.name = name;
+            if(!currentUser.avatarHtml) currentUser.avatarHtml = avatarBoxes[0].innerHTML;
+
+            savePreferences();
+            renderAppHeader();
+
+            document.getElementById('welcome-screen').classList.add('hidden');
+            setTimeout(() => {
+                const appScreen = document.getElementById('app-screen');
+                appScreen.style.display = 'flex';
+                requestAnimationFrame(() => appScreen.classList.add('visible'));
+            }, 300);
+        }
+
+        function renderAppHeader() {
+            document.getElementById('app-username-display').innerText = `Olá, ${currentUser.name}!`;
+            document.getElementById('app-avatar-display').innerHTML = currentUser.avatarHtml;
+        }
+
+        // --- LÓGICA DO NOVO MODAL ---
+        function openSettings() {
+            document.getElementById('settings-modal').classList.add('open');
+            document.getElementById('credits-area').classList.remove('show-credits-anim');
+            document.getElementById('credits-area').style.display = 'none';
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.remove('open');
+        }
+
+        function showCredits() {
+            const area = document.getElementById('credits-area');
+            area.style.display = 'block';
+            area.classList.add('show-credits-anim');
+        }
+
+        function resetProfile() {
+            // Pequena confirmação só pra garantir
+            if(confirm('Vai voltar para a tela inicial para editar, ok?')) {
+                localStorage.removeItem('cuteList_pref');
+                location.reload();
+            }
+        }
+
+        // --- LISTA ---
+        function addItem() {
+            const input = document.getElementById('itemInput');
+            const text = input.value.trim();
+            if (text === '') return;
+            createItemElement(text, false);
+            saveList();
+            input.value = ''; input.focus();
+            checkEmptyState();
+        }
+        function handleEnter(e) { if (e.key === 'Enter') addItem(); }
+
+        function createItemElement(text, isChecked) {
+            const ul = document.getElementById('shoppingList');
+            const li = document.createElement('li');
+            if(isChecked) li.classList.add('checked');
+
+            li.innerHTML = `
+                <div class="item-left" onclick="toggleCheck(this)">
+                    <div class="check-circle"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                    <span class="item-text">${text}</span>
+                </div>
+                <button class="delete-btn" onclick="deleteItem(this)">
+                    <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </button>
+            `;
+            ul.prepend(li);
+        }
+
+        function toggleCheck(div) { div.parentElement.classList.toggle('checked'); saveList(); }
+        
+        function deleteItem(btn) {
+            const li = btn.parentElement;
+            li.style.opacity = '0';
+            setTimeout(() => { li.remove(); saveList(); checkEmptyState(); }, 300);
+        }
+
+        function checkEmptyState() {
+            const ul = document.getElementById('shoppingList');
+            document.getElementById('emptyMsg').style.display = ul.children.length === 0 ? 'block' : 'none';
+        }
+
+        function saveList() {
+            const items = [];
+            document.querySelectorAll('#shoppingList li').forEach(li => {
+                items.push({ text: li.querySelector('.item-text').innerText, checked: li.classList.contains('checked') });
+            });
+            localStorage.setItem('cuteList_items', JSON.stringify(items));
+        }
+
+        function loadList() {
+            const data = localStorage.getItem('cuteList_items');
+            if (data) JSON.parse(data).reverse().forEach(i => createItemElement(i.text, i.checked));
+            checkEmptyState();
+        }
+
+        function savePreferences() { localStorage.setItem('cuteList_pref', JSON.stringify(currentUser)); }
+        
+        function loadPreferences() {
+            const data = localStorage.getItem('cuteList_pref');
+            if (data) {
+                currentUser = JSON.parse(data);
+                if(currentUser.theme) document.body.className = currentUser.theme;
+            }
+        }
+    </script>
+</body>
+</html>
